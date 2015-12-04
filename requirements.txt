@@ -1,2 +1,5 @@
 paython=0.0.3
-pywit
+PyWit==0.4.0
+wit==1.1
+pycurl==7.19.5.3
+requests==2.8.1

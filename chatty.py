@@ -67,12 +67,12 @@ def recharggy(phone_number=None, amount=None):
 		ip=customer_data['ip'])
 	try:
 		api = AuthorizeNet(username=username, password=password, debug=True, test=True)
-	except MissingDataError, DataValidationError as e:
+	except MissingDataError as e:
 		raise e
 	try:
 		gateway_response = api.auth(amount=amount, credit_card=credit_card, billing_info=customer_data, shipping_info=None)
 		response = gateway_response = api.settle(amount=amount, trans_id=trans_id)
-	except MissingTranslationError, GatewayError as e:
+	except MissingTranslationError as e:
 		raise e
 
 	return response
