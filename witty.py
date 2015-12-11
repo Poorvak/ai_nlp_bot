@@ -28,4 +28,4 @@ def witty_responder(input_text=None):
 	'''
 	if input_text:
 		witty_response = wit_object.get_message(query=input_text)
-		return witty_response['outcomes']['_text']
+		return witty_response

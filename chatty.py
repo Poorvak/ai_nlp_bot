@@ -1,10 +1,6 @@
-import os
-import subprocess
-import datetime
+import Checksum
 import config
 import witty
-import json 
-from paython import CreditCard, AuthorizeNet
 
 def aggregator(input_text=None):
 	'''
@@ -12,67 +8,45 @@ def aggregator(input_text=None):
 
 	:input_text:
 	'''
-	number_list=[] 
-	if not input_text:
-		raise config.MESSAGES['empty_message']
-	else:
-		number_list=has_numbers(input_text=input_text)
-		if number_list:
-			if (len(number_list)>=2):
-				base_string = input_text.split('Rs. ')[-1]
-				phone_number_string = int(base_string.split('number')[-1])
-				amount_string = int(base_string.split('number')[0])
-				recharggy(phone_number=phone_number_string, amount=amount_string)
+	try:
+		if not input_text:
+			raise config.MESSAGES['empty_message']
 		else:
-			return witty.witty_learner(learning_text=input_text)
-
-def has_numbers(input_text=None):
-	'''
-	returns list of numbers from a string
-	'''
-	return [int(s) for s in input_text.split() if s.isdigit()]
-
-def recharggy(phone_number=None, amount=None):
-	'''
-	recharggy module is used for recharging
-
-	:credit_card:
-	:customer_data:
-	:input_text:
-	'''
-	input_text = raw_input(config.MESSAGES['recharge_message'])
-	if not input_text:
-		return config.MESSAGES['response_message']
-	credit_card = CreditCard(
-		number = input_text['number'],
-		exp_mo = input_text['exp_mo'],
-		exp_yr = input_text['exp_yr'],
-		first_name = input_text['first_name'],
-		last_name = input_text['last_name'],
-		cvv = input_text['cvv'],
-		strict = False
-	)
-	if not credit_card.is_valid(): 
-	 	return 'hey we have a problem' # checks card number + expiration date
-	customer_details={} #Supposing customer data have all the data 
-	customer_data = dict(
-		address=customer_data['address'], 
-		address2=customer_data['address2'], 
-		city=customer_data['city'], 
-		state=customer_data['state'], 
-		zipcode=customer_data['zipcode'], 
-		country=customer_data['country'], 
-		phone=customer_data['phone'], 
-		email=customer_data['email'], 
-		ip=customer_data['ip'])
-	try:
-		api = AuthorizeNet(username=username, password=password, debug=True, test=True)
-	except MissingDataError as e:
-		raise e
-	try:
-		gateway_response = api.auth(amount=amount, credit_card=credit_card, billing_info=customer_data, shipping_info=None)
-		response = gateway_response = api.settle(amount=amount, trans_id=trans_id)
-	except MissingTranslationError as e:
+			response = witty.witty_responder(input_text=input_text)
+			outcomes = response.get('outcomes', None)[0]
+			if outcomes:
+				if outcomes.get('confidence', 0) > 0.0:
+					entities = outcomes.get('entities', None)
+					name = entities.get('name', outcomes.get('intent', None))[0]
+					if name:
+						return  name.get('value', None)
+		return None
+	except Exception as e:
 		raise e
 
-	return response
+
+'''
+The below methods are for PayTM wallet integration and can add money to the wallet using the seller merchant merchant_key
+'''
+data_dict = {
+        'MID': self.merchant_guid,
+        'ORDER_ID': order_id,
+        'TXN_AMOUNT': amount,
+        'CUST_ID': self.user_id,
+        'INDUSTRY_TYPE_ID': self.config['industry_type'],
+        'WEBSITE': self.config['website'],
+        'CHANNEL_ID': self.config['channel_id'],
+    }
+
+__sign__(param, dict)
+	
+# create checksum
+def __sign__(param_dict):
+    param_dict['CHECKSUMHASH'] = Checksum.generate_checksum(param_dict=param_dict, merchant_key={YOUR_MERCHANT_KEY})
+
+# verify checksum
+def validate(param_dict, merchant_key):
+        if 'CHECKSUMHASH' not in param_dict:
+            return False
+        checksum = param_dict.pop('CHECKSUMHASH')[0]
+        return Checksum.verify_checksum(param_dict=param_dict, merchant_key=merchant_key, checksum=checksum)

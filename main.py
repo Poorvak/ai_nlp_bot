@@ -17,11 +17,13 @@ chatty is for responding to the chat messgaes
 rest variables are self explinatory
 '''
 if __name__ == '__main__':
-    input_text = raw_input(config.MESSAGES['hi_message'])
-    if input_text:
-		while(input_text!=config.MESSAGES['bye_message'] and input_text):
-		    response = chatty.aggregator(input_text=input_text)
-        	input_input = raw_input(response)
-    else:
-    	print config.MESSAGES['empty_message'] 
+	try:
+		input_text = raw_input(config.MESSAGES['hi_message'])
+		if input_text:
+			while input_text:
+			    response = chatty.aggregator(input_text=input_text)
+			    print 'response', response
+	        	input_text = raw_input(response)
+	except Exception as e:
+		raise e
 
